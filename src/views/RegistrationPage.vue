@@ -4,19 +4,20 @@
         <h1 style="color: white; margin-bottom: 15px;">Регистрация</h1>
 
         <div style="color: white; width: 300px;">
-            <v-text-field label="Имя" v-model="name" hide-details="auto"></v-text-field>
-            <v-text-field label="Фамилия" v-model="firstname" hide-details="auto"></v-text-field>
+            <v-text-field label="Имя" v-model="firstName" hide-details="auto"></v-text-field>
+            <v-text-field label="Фамилия" v-model="lastName" hide-details="auto"></v-text-field>
             <v-text-field label="Почта" v-model="email" hide-details="auto"></v-text-field>
-            <v-text-field label="Организация" v-model="organization" hide-details="auto"></v-text-field>
+            <v-text-field label="Телефон" v-model="phone" hide-details="auto"></v-text-field>
+            <v-text-field label="Пол" v-model="gender" hide-details="auto"></v-text-field>
             <v-text-field label="Пароль" v-model="password"></v-text-field>
         </div>
 
         <div style="margin-bottom: 5px;">
-        <v-btn @click="enter" class="transparent-button">
+        <v-btn @click="addUser()" class="transparent-button">
             Зарегистрироваться
         </v-btn>
     </div>
-        <v-btn @click="this.$router.push('/');" class="transparent-button">
+        <v-btn @click="$router.push('/');" class="transparent-button">
             Отмена
         </v-btn>
     
@@ -25,32 +26,40 @@
 </template>
     
 <script>
-import { mapMutations } from "vuex";
+import { ref, push } from "firebase/database";
+import { db } from "@/firebase.js";
 
 export default {
 
     data() {
         return {
-            name: '',
-            firstname: '',
+            firstName: '',
+            lastName: '',
             email: '',
-            organization: '',
+            phone: '',
+            gender: '',
             password: ''
         };
     },
 
     methods: {
-        ...mapMutations(["changeEntrance", "changeEmail"]),
-        enter() {
-            if ((this.name == '') || (this.firstname == '') || (this.email == '')
-                || (this.organization == '') || (this.password == '')) {
-                alert('Поля не могут быть пустыми!');
-            } else {
-                this.changeEntrance(true);
-                this.changeEmail(this.email);
+        addUser() {
+            const formulasRef = ref(db, 'Users');
+            push(formulasRef, {
+                firstName: this.firstName,
+                lastName: this.lastName,
+                email: this.email,
+                phone: this.phone,
+                gender: this.gender,
+                role: 'user',
+                numberVM: '-',
+                password: this.password
+            }).then(() => {
                 this.$router.push('/');
-            }
-        },
+            }).catch((error) => {
+                console.error('Ошибка при добавлении формулы: ', error);
+            });
+        }
     }
 };
 </script>

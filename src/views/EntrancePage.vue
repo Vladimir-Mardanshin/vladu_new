@@ -11,47 +11,58 @@
         <div style="color: #C0C0C0; margin-top: 15px;">
             Нет аккаунта? <router-link style="color: blue;" to="/registration">Зарегистрироваться</router-link>
         </div>
-
     </div>
 </template>
-    
+
 <script>
+import { ref, query, orderByChild, equalTo, get } from "firebase/database";
+import { db } from "@/firebase.js";
 import { mapMutations } from "vuex";
-import { mapGetters } from "vuex";
 
 export default {
-
     data() {
         return {
             email: '',
             password: ''
         };
     },
-    computed: {
-    ...mapGetters(["getRoot"]),
-  },
     methods: {
-        ...mapMutations(["changeEntrance", "changeEmail"]),
-        enter() {
-            if ((this.email == '') || (this.password == '')) {
+        ...mapMutations(["changeUser"]),
+        async enter() {
+            if (this.email === '' || this.password === '') {
                 alert('Поля не могут быть пустыми!');
-            } else {
-                
-                this.changeEntrance(true);
-                this.changeEmail(this.email);
-                
-                if (this.getRoot === 'admin') {
-                    this.$router.push('/applications');
-                }
-                else {
-                    this.$router.push('/reservations');
-                }
+                return;
             }
-        },
+            
+            try {
+                const usersRef = ref(db, 'Users');
+                const emailQuery = query(usersRef, orderByChild('email'), equalTo(this.email));
+                const snapshot = await get(emailQuery);
+
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const userId = Object.keys(users).find(key => users[key].password === this.password);
+
+                    if (userId) {
+                        const user = users[userId];
+                        console.log('Пользователь найден: ', user);
+                        this.changeUser({ user, userId });
+                        this.$router.push('/vm');
+                    } else {
+                        alert('Неверный пароль.');
+                    }
+                } else {
+                    alert('Пользователь с таким email не найден.');
+                }
+            } catch (error) {
+                console.error('Ошибка при входе: ', error);
+                alert('Произошла ошибка при входе.');
+            }
+        }
     }
 };
 </script>
-    
+
 <style scoped>
 .transparent-button {
     width: 160px;
@@ -68,4 +79,3 @@ export default {
     text-align: center;
 }
 </style>
-    

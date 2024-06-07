@@ -1,16 +1,18 @@
 <template>
-  <div class="page" style="color: white;">
-    <div>
-      <v-textarea
-        label="node1 [Работает]"
-        v-model="inputText"
-        solo
-        full-width
-        auto-grow
-        @keyup.enter="appendText"
-      ></v-textarea>
+  <div v-if="getNumberVM != ''">
+    <div class="page" style="color: white;">
+      <div>
+        <v-textarea label="node1 [Работает]" v-model="inputText" solo full-width auto-grow
+          @keyup.enter="appendText"></v-textarea>
+      </div>
     </div>
     <RightSideСalendar />
+  </div>
+  <div class="centered-container" v-else>
+    <h1 style="color: white; margin-bottom: 15px;">Выполните вход!</h1>
+    <v-btn @click="$router.push('/')" class="transparent-button">
+      Войти
+    </v-btn>
   </div>
 </template>
 
@@ -24,136 +26,27 @@ export default {
   },
   data() {
     return {
-      inputText: 'user@node1~$: ', // Начальное значение для v-model
-      dialog: false,
-      faces: [],
-      inform: "",
-      backcol: ["", "", "", "", "", "", "", "", ""]
+      inputText: 'user@node1~$: ',
     }
   },
   computed: {
-    ...mapGetters(["getPeoples"]),
+    ...mapGetters(["getPeoples", "getNumberVM"]),
   },
   methods: {
-    openInfo(info) {
-      this.inform = info;
-    },
-    chengeTheme(emp) {
-      if (emp == 1) {
-        return "background-color: #C0C0C0";
-      }
-      else
-        return "";
-    },
-    changeBaccol(N) {
-      if (this.backcol[N] == "") {
-        this.backcol[N] = "background-color: #C0C0C0;";
-      }
-      else {
-        this.backcol[N] = "";
-      }
-    },
-    addEl(newEl) {
-      if (this.faces.length < 2) {
-        this.faces.push(newEl);
-      }
-    },
-    check() {
-      if (this.faces.length == 2) {
-        alert("Ошибка! Может быть только 2 исполнителя.");
-      }
-    },
-    deleteEl(delEl) {
-      this.faces.splice(delEl, 1);
-    },
-    sendInvitation() {
-      alert("Бронь закреплена!");
-      this.dialog = false;
-    },
     appendText() {
-      this.inputText += 'user@node1~$: '; // Добавляет текст при нажатии Enter
+      this.inputText += 'user@node1~$: '; 
     }
   }
 }
 </script>
 
 <style scoped>
-.infoDial {
+.centered-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  background-color: #ececec;
-  width: 400px;
-  padding: 20px;
-  border-radius: 10px;
-}
-.elem {
-  display: flex;
-  color: black;
-  margin-right: 5px;
-  margin: 6px;
-  border-radius: 10px;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  border: 2px solid #C0C0C0;
-}
-
-.parent {
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.child1 {
-  width: 130%;
-  background-color: #ececec;
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.child2 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.ttit {
-  display: flex;
-  align-items: left;
-  margin-top: 140px;
-  margin-left: 2%;
-  color: black;
-}
-
-.dbtn {
-  display: flex;
-  align-items: left;
-}
-
-.top-half {
-  background-color: #C0C0C0;
-  height: 65%;
-}
-
-.bottom-half {
-  background-color: #ececec;
-  height: 35%;
-  display: flex;
-}
-
-.bottom-half>div {
-  margin-right: 10px;
-}
-
-.container {
-  height: 300px;
-  width: 100%;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 .page {
@@ -161,38 +54,5 @@ export default {
   color: azure;
   margin-left: 3.4%;
   width: 70%;
-}
-
-.forbd {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.forp {
-  border-radius: 10px;
-  background-color: #C0C0C0;
-  padding: 6px;
-}
-
-.faces-container {
-  height: 50px;
-  display: flex;
-  align-items: center;
-}
-
-.ftime {
-  width: 150px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-}
-
-.fdial {
-  background-color: #ececec;
-  width: 520px;
-  padding: 20px;
-  border-radius: 10px;
 }
 </style>

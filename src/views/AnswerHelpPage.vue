@@ -1,34 +1,40 @@
 <template>
+  <div v-if="getNumberVM != ''">
     <div class="page" style="color: white;">
-      
-    <h2 style="display: flex; justify-content: flex-start; margin-top: 20px; margin-bottom: 20px;">Обращения в поддержку:</h2>
-      
-  
-    <div style="margin-bottom: 20px; border: 1px solid grey;" class="container" v-for="item in filteredItems" :key="item.id">
+
+      <h2 style="display: flex; justify-content: flex-start; margin-top: 20px; margin-bottom: 20px;">Обращения в
+        поддержку:</h2>
+
+      <div style="margin-bottom: 20px; border: 1px solid grey;" class="container" v-for="item in answerQuestions"
+        :key="item.key">
         <div style="display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start;">
-            <h2 style="margin-bottom: 10px; margin-top: 5px; margin-left: 10px;">Обращение:</h2>
-            <p style="margin-bottom: 10px; margin-left: 10px;">{{ item.question }}</p>
-            <v-textarea 
-        label="Ответ на обращение"
-        v-model="inputText"
-        solo
-        style="width: 600px; margin-left: 10px;"
-      ></v-textarea>
-      <div >
-        <v-btn @click="changeAnswer({ id: item.id, newAnswer: inputText })" style="border-radius: 5px; margin-left: 10px; margin-bottom: 10px;">Ответить</v-btn>
-      </div>
+          <h2 style="margin-bottom: 10px; margin-top: 5px; margin-left: 10px;">Обращение:</h2>
+          <p style="margin-bottom: 10px; margin-left: 10px;">{{ item.question }}</p>
+          <v-textarea label="Ответ на обращение" v-model="inputText" solo
+            style="width: 600px; margin-left: 10px;"></v-textarea>
+          <div>
+            <v-btn @click="changeAnswer(item.key)"
+              style="border-radius: 5px; margin-left: 10px; margin-bottom: 10px;">Ответить</v-btn>
+          </div>
         </div>
-    </div>
-
-
+      </div>
     </div>
     <RightSideСalendar />
-  </template>
+  </div>
+  <div class="centered-container" v-else>
+    <h1 style="color: white; margin-bottom: 15px;">Выполните вход!</h1>
+    <v-btn @click="$router.push('/')" class="transparent-button">
+      Войти
+    </v-btn>
+  </div>
+</template>
+
 
 <script>
+import { ref, update, onValue } from "firebase/database";
+import { db } from "@/firebase.js";
 import RightSideСalendar from '../components/RightSideСalendar.vue';
 import { mapGetters } from "vuex";
-import { mapMutations } from "vuex";
 
 export default {
   components: {
@@ -36,136 +42,53 @@ export default {
   },
   data() {
     return {
-      inputText: '', // Начальное значение для v-model
-      dialog: false,
-      faces: [],
-      inform: "",
-      backcol: ["", "", "", "", "", "", "", "", ""]
+      inputText: '',
+      questions: []
     }
   },
   computed: {
-    ...mapGetters(["getItems"]),
-    filteredItems() {
-      return this.getItems.filter(items => items.answer === '-');
+    ...mapGetters(["getNumberVM"]),
+    answerQuestions() {
+      return this.questions.filter(question => question.answer === '-');
     }
   },
   methods: {
-    ...mapMutations(["changeAnswer"]),
-    openInfo(info) {
-      this.inform = info;
+    fetchQuestions() {
+      const questionRef = ref(db, 'Questions');
+      onValue(questionRef, (snapshot) => {
+        const data = snapshot.val();
+        const questionsArray = [];
+        for (let key in data) {
+          questionsArray.push({ key, ...data[key] });
+        }
+        this.questions = questionsArray;
+      });
     },
-    send() {
-      alert('Сообщение отправлено!');
-    },
-    chengeTheme(emp) {
-      if (emp == 1) {
-        return "background-color: #C0C0C0";
-      }
-      else
-        return "";
-    },
-    changeBaccol(N) {
-      if (this.backcol[N] == "") {
-        this.backcol[N] = "background-color: #C0C0C0;";
-      }
-      else {
-        this.backcol[N] = "";
-      }
-    },
-    addEl(newEl) {
-      if (this.faces.length < 2) {
-        this.faces.push(newEl);
-      }
-    },
-    check() {
-      if (this.faces.length == 2) {
-        alert("Ошибка! Может быть только 2 исполнителя.");
-      }
-    },
-    deleteEl(delEl) {
-      this.faces.splice(delEl, 1);
-    },
-    sendInvitation() {
-      alert("Бронь закреплена!");
-      this.dialog = false;
-    },
-    appendText() {
-      this.inputText += 'user@node1~$: '; // Добавляет текст при нажатии Enter
+    changeAnswer(key) {
+      const qRef = ref(db, `Questions/${key}`);
+      update(qRef, {
+        answer: this.inputText
+      }).then(() => {
+        this.fetchQuestions();
+        this.inputText = ''; // Очистка текстового поля после отправки ответа
+      }).catch((error) => {
+        console.error('Ошибка при ответе: ', error);
+      });
     }
+  },
+  created() {
+    this.fetchQuestions(); 
   }
 }
 </script>
 
 <style scoped>
-.infoDial {
+.centered-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  background-color: #ececec;
-  width: 400px;
-  padding: 20px;
-  border-radius: 10px;
-}
-.elem {
-  display: flex;
-  color: black;
-  margin-right: 5px;
-  margin: 6px;
-  border-radius: 10px;
-  height: 40px;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  border: 2px solid #C0C0C0;
-}
-
-.parent {
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.child1 {
-  width: 130%;
-  background-color: #ececec;
-  flex-wrap: wrap;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.child2 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.ttit {
-  display: flex;
-  align-items: left;
-  margin-top: 140px;
-  margin-left: 2%;
-  color: black;
-}
-
-.dbtn {
-  display: flex;
-  align-items: left;
-}
-
-.top-half {
-  background-color: #C0C0C0;
-  height: 65%;
-}
-
-.bottom-half {
-  background-color: #ececec;
-  height: 35%;
-  display: flex;
-}
-
-.bottom-half>div {
-  margin-right: 10px;
 }
 
 .container {
@@ -177,38 +100,5 @@ export default {
   color: azure;
   margin-left: 3.4%;
   width: 70%;
-}
-
-.forbd {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.forp {
-  border-radius: 10px;
-  background-color: #C0C0C0;
-  padding: 6px;
-}
-
-.faces-container {
-  height: 50px;
-  display: flex;
-  align-items: center;
-}
-
-.ftime {
-  width: 150px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-}
-
-.fdial {
-  background-color: #ececec;
-  width: 520px;
-  padding: 20px;
-  border-radius: 10px;
 }
 </style>

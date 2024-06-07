@@ -1,53 +1,56 @@
+// store.js
 export default {
-
     state: {
-      name: "Владислав",
-      firstName: "Везинг",
-      gender: "Муж",
-      mail: "user@mail.ru",
-      phone: "89500603158",
-      root: "admin",
-      password: "1234",
-      numberVM: "8743560122",
-      entrance: true
+        id: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        gender: '',
+        role: '',
+        numberVM: ''
     },
 
     getters: {
-      getUser(state) {
-        return state.name + " " + state.firstName;
-      },
-      getGender(state) {
-        return state.gender;
-      },
-      getMail(state) {
-        return state.mail;
-      },
-      getPhone(state) {
-        return state.phone;
-      },
-      getRoot(state) {
-        return state.root;
-      },
-      getPassword(state) {
-        return state.password;
-      },
-      getNumberVM(state) {
-        return state.numberVM;
-      },
-      getEntrance(state) {
-        return state.entrance;
-      },
+        getId(state) {
+            return state.id;
+        },
+        getUser(state) {
+            return state.firstName + " " + state.lastName;
+        },
+        getGender(state) {
+            return state.gender;
+        },
+        getMail(state) {
+            return state.email;
+        },
+        getPhone(state) {
+            return state.phone;
+        },
+        getRole(state) {
+            return state.role;
+        },
+        getNumberVM(state) {
+            return state.numberVM;
+        }
     },
 
     mutations: {
-      changeEntrance(state, newEntrance) {
-        state.entrance = newEntrance;
-      },
-      changeEmail(state, newEmail) {
-        state.email = newEmail;
-      }
+        changeUser(state, payload) {
+            const { user, userId } = payload;
+            state.id = userId;
+            state.firstName = user.firstName;
+            state.lastName = user.lastName;
+            state.email = user.email;
+            state.phone = user.phone;
+            state.gender = user.gender;
+            state.role = user.role;
+            state.numberVM = user.numberVM;
+        },
+        changeNumberVM(state, newNumberVM) {
+            state.numberVM = newNumberVM;
+        }
     },
 
     actions: {}
-    
-  };
+};
